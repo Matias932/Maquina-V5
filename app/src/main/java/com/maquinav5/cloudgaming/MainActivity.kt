@@ -35,10 +35,9 @@ class MainActivity : Activity() {
         window.statusBarColor = bg
         window.navigationBarColor = Color.rgb(5, 5, 10)
 
-        val scroll = ScrollView(this).apply {
-            fillViewport = true
-            setBackgroundColor(bg)
-        }
+        val scroll = ScrollView(this)
+        scroll.isFillViewport = true
+        scroll.setBackgroundColor(bg)
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -57,7 +56,9 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER
         }
 
-        status = label("●  SERVIDOR DESCONECTADO", 13f, muted, true).apply {
+        status = label(
+            "●  SERVIDOR DESCONECTADO", 13f, muted, true
+        ).apply {
             gravity = Gravity.CENTER
             setPadding(0, dp(16), 0, dp(16))
         }
@@ -80,25 +81,26 @@ class MainActivity : Activity() {
 
         save.setOnClickListener {
             val address = serverAddress.text.toString().trim()
+
             if (address.isBlank()) {
-                status.text = "●  INTRODUCE UNA DIRECCIÓN"
-                status.setTextColor(Color.rgb(255, 100, 120))
+                showStatus("●  INTRODUCE UNA DIRECCIÓN", Color.rgb(255, 100, 120))
             } else {
                 prefs.edit().putString("server_address", address).apply()
-                status.text = "●  DIRECCIÓN GUARDADA"
-                status.setTextColor(Color.rgb(90, 240, 160))
+                showStatus("●  DIRECCIÓN GUARDADA", Color.rgb(90, 240, 160))
             }
         }
 
         connect.setOnClickListener {
             val address = serverAddress.text.toString().trim()
+
             if (address.isBlank()) {
-                status.text = "●  INTRODUCE UNA DIRECCIÓN"
-                status.setTextColor(Color.rgb(255, 100, 120))
+                showStatus("●  INTRODUCE UNA DIRECCIÓN", Color.rgb(255, 100, 120))
             } else {
                 prefs.edit().putString("server_address", address).apply()
-                status.text = "●  DIRECCIÓN GUARDADA; FALTA EL SERVIDOR"
-                status.setTextColor(Color.rgb(255, 205, 100))
+                showStatus(
+                    "●  DIRECCIÓN GUARDADA; FALTA CONFIGURAR EL SERVIDOR",
+                    Color.rgb(255, 205, 100)
+                )
             }
         }
 
@@ -109,22 +111,40 @@ class MainActivity : Activity() {
         root.addView(space(8))
         root.addView(status, matchWrap())
 
-        root.addView(sectionCard().apply {
-            addView(serverTitle, matchWrap())
-            addView(space(8))
-            addView(serverAddress, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(54)
-            ))
-            addView(space(10))
-            addView(save, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
-            ))
-            addView(space(8))
-            addView(connect, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
-            ))
-        }, matchWrap())
+        val serverCard = sectionCard()
 
+        serverCard.addView(serverTitle, matchWrap())
+        serverCard.addView(space(8))
+
+        serverCard.addView(
+            serverAddress,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(54)
+            )
+        )
+
+        serverCard.addView(space(10))
+
+        serverCard.addView(
+            save,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(52)
+            )
+        )
+
+        serverCard.addView(space(8))
+
+        serverCard.addView(
+            connect,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(52)
+            )
+        )
+
+        root.addView(serverCard, matchWrap())
         root.addView(space(22))
         root.addView(label("TU BIBLIOTECA", 18f, white, true), matchWrap())
         root.addView(space(10))
@@ -135,13 +155,30 @@ class MainActivity : Activity() {
         root.addView(gameCard("CYBERPUNK 2077", "RPG · Ciencia ficción"))
         root.addView(space(18))
 
-        root.addView(label(
-            "Los juegos necesitan un servidor remoto compatible para ejecutarse.",
-            12f, muted, false
-        ), matchWrap())
+        root.addView(
+            label(
+                "Los juegos necesitan un servidor remoto compatible para ejecutarse.",
+                12f,
+                muted,
+                false
+            ),
+            matchWrap()
+        )
 
-        scroll.addView(root)
+        scroll.addView(
+            root,
+            ScrollView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+
         setContentView(scroll)
+    }
+
+    private fun showStatus(message: String, color: Int) {
+        status.text = message
+        status.setTextColor(color)
     }
 
     private fun label(
@@ -154,16 +191,23 @@ class MainActivity : Activity() {
             text = textValue
             textSize = size
             setTextColor(color)
-            if (bold) setTypeface(null, Typeface.BOLD)
+
+            if (bold) {
+                setTypeface(null, Typeface.BOLD)
+            }
         }
     }
 
-    private fun actionButton(textValue: String, primary: Boolean): Button {
+    private fun actionButton(
+        textValue: String,
+        primary: Boolean
+    ): Button {
         return Button(this).apply {
             text = textValue
             textSize = 12f
             isAllCaps = false
             setTextColor(white)
+
             background = roundRect(
                 if (primary) purple else panel,
                 dp(12),
@@ -172,17 +216,34 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun gameCard(name: String, description: String): LinearLayout {
+    private fun gameCard(
+        name: String,
+        description: String
+    ): LinearLayout {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(16), dp(14), dp(16), dp(14))
-            background = roundRect(panel, dp(14), Color.rgb(60, 48, 85))
+
+            background = roundRect(
+                panel,
+                dp(14),
+                Color.rgb(60, 48, 85)
+            )
 
             addView(label(name, 16f, white, true), matchWrap())
             addView(space(5))
             addView(label(description, 12f, muted, false), matchWrap())
             addView(space(8))
-            addView(label("SERVIDOR DE JUEGO REQUERIDO", 10f, purple, true), matchWrap())
+
+            addView(
+                label(
+                    "SERVIDOR DE JUEGO REQUERIDO",
+                    10f,
+                    purple,
+                    true
+                ),
+                matchWrap()
+            )
         }
     }
 
@@ -190,11 +251,20 @@ class MainActivity : Activity() {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(16), dp(16), dp(16), dp(16))
-            background = roundRect(panel, dp(16), Color.rgb(70, 52, 105))
+
+            background = roundRect(
+                panel,
+                dp(16),
+                Color.rgb(70, 52, 105)
+            )
         }
     }
 
-    private fun roundRect(color: Int, radius: Int, stroke: Int): GradientDrawable {
+    private fun roundRect(
+        color: Int,
+        radius: Int,
+        stroke: Int
+    ): GradientDrawable {
         return GradientDrawable().apply {
             setColor(color)
             cornerRadius = radius.toFloat()
@@ -208,11 +278,14 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun matchWrap() = LinearLayout.LayoutParams(
-        ViewGroup.LayoutParams.MATCH_PARENT,
-        ViewGroup.LayoutParams.WRAP_CONTENT
-    )
+    private fun matchWrap(): LinearLayout.LayoutParams {
+        return LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+    }
 
-    private fun dp(value: Int): Int =
-        (value * resources.displayMetrics.density).toInt()
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
+    }
 }
