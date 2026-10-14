@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'app/**'
+      - '*.gradle'
       - '*.gradle.kts'
       - 'gradle.properties'
       - '.github/workflows/build.yml'
@@ -26,23 +27,31 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
+      - name: Install Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Install Android platform
-        run: |
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build APK
-        run: gradle --no-daemon assembleDebug
+        run: |
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew --no-daemon assembleDebug
+          elif [ -f build.gradle ] || [ -f build.gradle.kts ]; then
+            gradle --no-daemon assembleDebug
+          else
+            echo "ERROR: No se encontró el proyecto Gradle en la raíz."
+            ls -la
+            exit 1
+          fi
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: maquina-cloud-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: '**/build/outputs/apk/debug/*.apk'
+          if-no-files-found: error
