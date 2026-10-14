@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - 'app/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
       - '.github/workflows/build.yml'
 
 permissions:
@@ -15,27 +17,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download project
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Java
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Check project structure
-        run: |
-          echo "Repository downloaded successfully."
-          echo "Checking Android project files..."
-          find . -maxdepth 4 -type f | sort
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Report missing Android project
-        run: |
-          if [ ! -f app/build.gradle ] && [ ! -f app/build.gradle.kts ]; then
-            echo "::error::Android Gradle project is missing. A real APK cannot be built yet."
-            exit 1
-          fi
+      - name: Build APK
+        run: gradle --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: maquina-cloud-debug
+          path: app/build/outputs/apk/debug/*.apk
