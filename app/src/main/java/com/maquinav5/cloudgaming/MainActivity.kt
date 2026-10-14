@@ -56,9 +56,7 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER
         }
 
-        status = label(
-            "●  SERVIDOR DESCONECTADO", 13f, muted, true
-        ).apply {
+        status = label("●  SERVIDOR DESCONECTADO", 13f, muted, true).apply {
             gravity = Gravity.CENTER
             setPadding(0, dp(16), 0, dp(16))
         }
@@ -165,14 +163,7 @@ class MainActivity : Activity() {
             matchWrap()
         )
 
-        scroll.addView(
-            root,
-            ScrollView.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        )
-
+        scroll.addView(root)
         setContentView(scroll)
     }
 
@@ -198,10 +189,7 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun actionButton(
-        textValue: String,
-        primary: Boolean
-    ): Button {
+    private fun actionButton(textValue: String, primary: Boolean): Button {
         return Button(this).apply {
             text = textValue
             textSize = 12f
@@ -216,10 +204,7 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun gameCard(
-        name: String,
-        description: String
-    ): LinearLayout {
+    private fun gameCard(name: String, description: String): LinearLayout {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(16), dp(14), dp(16), dp(14))
@@ -234,14 +219,8 @@ class MainActivity : Activity() {
             addView(space(5))
             addView(label(description, 12f, muted, false), matchWrap())
             addView(space(8))
-
             addView(
-                label(
-                    "SERVIDOR DE JUEGO REQUERIDO",
-                    10f,
-                    purple,
-                    true
-                ),
+                label("SERVIDOR DE JUEGO REQUERIDO", 10f, purple, true),
                 matchWrap()
             )
         }
